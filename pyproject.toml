@@ -1,0 +1,15 @@
+[build-system]
+requires=["setuptools>=68"]
+build-backend="setuptools.build_meta"
+
+[project]
+name="mbunga-ftp"
+version="0.3.0"
+requires-python=">=3.10"
+dependencies=[]
+
+[project.scripts]
+mbunga-ftp="mbunga_ftp.cli:main"
+
+[tool.setuptools.packages.find]
+include=["mbunga_ftp*"]
